@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 
 public class Server {
 
+    /**
+     *  入口函数，启动http服务器
+     * @param port 监听的端口号
+     * @throws Exception 那些懒得处理的异常
+     */
     public void monitor(int port) throws Exception {
         ServerSocket serverSocket = new ServerSocket(port);
         System.out.println("监听" + port + "号端口");
@@ -17,9 +22,12 @@ public class Server {
             // 获取请求报文
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.ISO_8859_1));
             HttpRequest request = decode(bufferedReader);
+            if (request == null) {
+                System.out.println("无法解析的连接请求");
+                continue;
+            }
             System.out.println("解码成功");
             HttpResponse response = new HttpResponse();
-            assert request != null;
             response.version = request.version;
             // 查找文件
             response.doGet(request.url);
@@ -62,14 +70,14 @@ public class Server {
             request.headers = headers;
             // TODO:解析请求主体
             return request;
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("解析报文失败");
         }
         return null;
     }
 
     /**
-     *编码http响应报文
+     * 编码http响应报文
      * @param response 返回数据
      * @return 字节数组
      */
